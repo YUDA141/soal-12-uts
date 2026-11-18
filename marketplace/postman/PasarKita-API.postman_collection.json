@@ -1,0 +1,229 @@
+{
+  "info": {
+    "name": "PasarKita REST API",
+    "description": "Koleksi pengujian REST API marketplace (Soal 12). Jalankan XAMPP (Apache + MySQL) dan import database/schema.sql terlebih dahulu.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost/marketplace/api" }
+  ],
+  "item": [
+    {
+      "name": "Publik",
+      "item": [
+        {
+          "name": "GET Daftar endpoint",
+          "request": { "method": "GET", "url": "{{base_url}}/" }
+        },
+        {
+          "name": "GET Semua produk",
+          "request": { "method": "GET", "url": "{{base_url}}/produk.php" }
+        },
+        {
+          "name": "GET Produk dengan filter & pagination",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/produk.php?q=&kategori=1&page=1&limit=5",
+              "host": ["{{base_url}}"],
+              "path": ["produk.php"],
+              "query": [
+                { "key": "q", "value": "" },
+                { "key": "kategori", "value": "1" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "5" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Detail produk (id=1)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/produk.php?id=1",
+              "host": ["{{base_url}}"],
+              "path": ["produk.php"],
+              "query": [{ "key": "id", "value": "1" }]
+            }
+          }
+        },
+        {
+          "name": "GET Detail produk tidak ada (404)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/produk.php?id=999",
+              "host": ["{{base_url}}"],
+              "path": ["produk.php"],
+              "query": [{ "key": "id", "value": "999" }]
+            }
+          }
+        },
+        {
+          "name": "GET Id tidak valid (400)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/produk.php?id=abc",
+              "host": ["{{base_url}}"],
+              "path": ["produk.php"],
+              "query": [{ "key": "id", "value": "abc" }]
+            }
+          }
+        },
+        {
+          "name": "GET Semua kategori",
+          "request": { "method": "GET", "url": "{{base_url}}/kategori.php" }
+        },
+        {
+          "name": "GET Detail kategori (id=1)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/kategori.php?id=1",
+              "host": ["{{base_url}}"],
+              "path": ["kategori.php"],
+              "query": [{ "key": "id", "value": "1" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pembeli (Basic Auth)",
+      "auth": {
+        "type": "basic",
+        "basic": [
+          { "key": "username", "value": "pembeli@demo.com", "type": "string" },
+          { "key": "password", "value": "password123", "type": "string" }
+        ]
+      },
+      "item": [
+        {
+          "name": "POST Buat pesanan (201)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_penerima\": \"Pembeli Demo\",\n  \"no_hp_penerima\": \"085212345678\",\n  \"alamat_pengiriman\": \"Jl. Raya No. 10, Kota Bengkulu\",\n  \"metode_pembayaran\": \"transfer\",\n  \"catatan\": \"Tolong dibungkus rapi\",\n  \"items\": [\n    { \"id_produk\": 1, \"jumlah\": 2 },\n    { \"id_produk\": 3, \"jumlah\": 1 }\n  ]\n}"
+            },
+            "url": "{{base_url}}/pesanan.php"
+          }
+        },
+        {
+          "name": "POST Pesanan stok tidak cukup (409)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_penerima\": \"Pembeli Demo\",\n  \"no_hp_penerima\": \"085212345678\",\n  \"alamat_pengiriman\": \"Jl. Raya No. 10, Kota Bengkulu\",\n  \"metode_pembayaran\": \"cod\",\n  \"items\": [ { \"id_produk\": 1, \"jumlah\": 9999 } ]\n}"
+            },
+            "url": "{{base_url}}/pesanan.php"
+          }
+        },
+        {
+          "name": "POST Pesanan data tidak valid (422)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nama_penerima\": \"\",\n  \"no_hp_penerima\": \"abc\"\n}" },
+            "url": "{{base_url}}/pesanan.php"
+          }
+        },
+        {
+          "name": "POST Pesanan tanpa login (401)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{base_url}}/pesanan.php"
+          }
+        },
+        {
+          "name": "GET Daftar pesanan saya",
+          "request": { "method": "GET", "url": "{{base_url}}/pesanan.php" }
+        },
+        {
+          "name": "GET Detail pesanan (id=1)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/pesanan.php?id=1",
+              "host": ["{{base_url}}"],
+              "path": ["pesanan.php"],
+              "query": [{ "key": "id", "value": "1" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Penjual (Basic Auth)",
+      "auth": {
+        "type": "basic",
+        "basic": [
+          { "key": "username", "value": "penjual@demo.com", "type": "string" },
+          { "key": "password", "value": "password123", "type": "string" }
+        ]
+      },
+      "item": [
+        {
+          "name": "POST Tambah produk (201)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_produk\": \"Bawang Merah 1 kg\",\n  \"id_kategori\": 1,\n  \"harga\": 38000,\n  \"stok\": 30,\n  \"deskripsi\": \"Bawang merah segar kualitas super.\"\n}"
+            },
+            "url": "{{base_url}}/produk.php"
+          }
+        },
+        {
+          "name": "PUT Ubah produk (id=1)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"harga\": 27000,\n  \"stok\": 35\n}" },
+            "url": {
+              "raw": "{{base_url}}/produk.php?id=1",
+              "host": ["{{base_url}}"],
+              "path": ["produk.php"],
+              "query": [{ "key": "id", "value": "1" }]
+            }
+          }
+        },
+        {
+          "name": "PUT Ubah produk milik penjual lain (403)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"stok\": 1\n}" },
+            "url": {
+              "raw": "{{base_url}}/produk.php?id=5",
+              "host": ["{{base_url}}"],
+              "path": ["produk.php"],
+              "query": [{ "key": "id", "value": "5" }]
+            }
+          }
+        },
+        {
+          "name": "DELETE Hapus produk (ganti id dengan produk baru Anda)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/produk.php?id=9",
+              "host": ["{{base_url}}"],
+              "path": ["produk.php"],
+              "query": [{ "key": "id", "value": "9" }]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
